@@ -1,4 +1,35 @@
-<!DOCTYPE html>
+const fs = require('fs');
+const path = require('path');
+const http = require('http');
+const express = require('express');
+const { WebSocketServer } = require('ws');
+const { Pool } = require('pg');
+
+// Safely load dotenv if local .env file exists (won't crash on Railway)
+if (fs.existsSync(path.join(__dirname, '.env'))) {
+  require('dotenv').config();
+}
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+// PostgreSQL Database Connection Pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false }
+});
+
+app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date() });
+});
+
+// Main Dashboard Route serving the Punk Physio UI
+app.get('/', (req, res) => {
+  const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -26,7 +57,6 @@
     margin: 0;
   }
 
-  /* Chat Container */
   .chat-container {
     width: 380px;
     height: 600px;
@@ -39,7 +69,6 @@
     overflow: hidden;
   }
 
-  /* Header */
   .chat-header {
     background: var(--neon-yellow);
     color: #000;
@@ -52,7 +81,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transform: rotate(-1deg); /* Slight punk tilt */
+    transform: rotate(-1deg);
     margin: 5px;
   }
 
@@ -71,7 +100,6 @@
     100% { opacity: 1; }
   }
 
-  /* Messages Area */
   .chat-messages {
     flex: 1;
     padding: 20px;
@@ -95,7 +123,7 @@
     color: var(--text-white);
     align-self: flex-start;
     box-shadow: var(--shadow);
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 90% 100%, 0 100%); /* Jagged edge */
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 90% 100%, 0 100%);
     padding-bottom: 20px;
   }
 
@@ -104,11 +132,10 @@
     color: #000;
     align-self: flex-end;
     box-shadow: var(--shadow);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 10% 100%, 0 85%); /* Jagged edge */
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 10% 100%, 0 85%);
     padding-bottom: 20px;
   }
 
-  /* Quick Replies */
   .quick-replies {
     display: flex;
     flex-wrap: wrap;
@@ -136,7 +163,6 @@
     box-shadow: 2px 2px 0px var(--punk-pink);
   }
 
-  /* Input Area */
   .chat-input {
     display: flex;
     border-top: 3px solid var(--neon-yellow);
@@ -174,7 +200,6 @@
     color: #000;
   }
 
-  /* Scrollbar styling */
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: #111; }
   ::-webkit-scrollbar-thumb { background: var(--punk-pink); }
@@ -188,13 +213,8 @@
     <div class="status-dot"></div>
   </div>
 
-  <div class="chat-messages" id="chatMessages">
-    <!-- Messages will be injected here -->
-  </div>
-
-  <div class="quick-replies" id="quickReplies">
-    <!-- Quick replies injected here -->
-  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="quick-replies" id="quickReplies"></div>
 
   <div class="chat-input">
     <input type="text" id="userInput" placeholder="Type your pain... or just say hi." onkeypress="handleEnter(event)">
@@ -207,7 +227,28 @@
   const userInput = document.getElementById('userInput');
   const quickRepliesContainer = document.getElementById('quickReplies');
 
-  // Punk Persona Responses
+  // WebSocket Connection Setup
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(proto + '//' + location.host);
+
+  ws.onopen = () => {
+    console.log('Connected to WebSocket backend');
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.reply) {
+        addMessage(data.reply, 'bot');
+        if (data.nextReplies && data.nextReplies.length > 0) {
+          showQuickReplies(data.nextReplies);
+        }
+      }
+    } catch (e) {
+      addMessage(event.data, 'bot');
+    }
+  };
+
   const responses = {
     greeting: "Yo. I'm Riff. You hurt? Let's fix it. No corporate BS, just get you back in the mosh pit. What's busted?",
     book: "Let's get you on the table. I can book you for a 'Smash & Fix' session. When do you want to come in? (Type a day/time)",
@@ -219,7 +260,6 @@
     default: "I didn't catch that, man. My ears are ringing. Try asking to 'book', asking about 'pain', or check our 'hours'."
   };
 
-  // Initial Bot Message
   function initChat() {
     addMessage(responses.greeting, 'bot');
     showQuickReplies(['Book Session', 'My Back Hurts', 'Hours', 'Location']);
@@ -246,60 +286,76 @@
 
   function handleQuickReply(text) {
     addMessage(text, 'user');
-    quickRepliesContainer.innerHTML = ''; // Clear buttons
-    processInput(text.toLowerCase());
+    quickRepliesContainer.innerHTML = '';
+    ws.send(text);
   }
 
   function sendMessage() {
     const text = userInput.value.trim();
     if (!text) return;
-    
     addMessage(text, 'user');
     userInput.value = '';
-    processInput(text.toLowerCase());
+    ws.send(text);
   }
 
   function handleEnter(event) {
     if (event.key === 'Enter') sendMessage();
   }
 
-  function processInput(input) {
-    // Simulate typing delay
+  initChat();
+</script>
+</body>
+</html>`;
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.status(200).send(htmlContent);
+});
+
+// WebSocket Server Logic & Response Evaluator
+wss.on('connection', (ws) => {
+  console.log('New client connected');
+
+  ws.on('message', (message) => {
+    const input = message.toString().trim().toLowerCase();
+    console.log('Received:', input);
+
     setTimeout(() => {
-      let reply = responses.default;
+      let reply = "I didn't catch that, man. My ears are ringing. Try asking to 'book', asking about 'pain', or check our 'hours'.";
       let nextReplies = [];
 
       if (input.includes('book') || input.includes('appointment') || input.includes('session')) {
-        reply = responses.book;
+        reply = "Let's get you on the table. I can book you for a 'Smash & Fix' session. When do you want to come in? (Type a day/time)";
         nextReplies = ['Tomorrow', 'Next Week', 'Nevermind'];
       } else if (input.includes('hurt') || input.includes('pain') || input.includes('busted')) {
-        reply = responses.pain;
+        reply = "Pain is just weakness leaving the body... but seriously, let's not ignore it. Where does it hurt? Back, knee, neck?";
         nextReplies = ['Back', 'Knee', 'Neck', 'Shoulder'];
       } else if (input.includes('back')) {
-        reply = responses.back;
+        reply = "Lower back? Classic. You've been sitting too long or lifting wrong. We'll crack that open and get you moving. Book a session?";
         nextReplies = ['Book Session', 'Tell me more'];
       } else if (input.includes('knee')) {
-        reply = responses.knee;
+        reply = "Knee acting up? We'll rebuild that joint like a vintage amp. Let's get you in for an assessment.";
         nextReplies = ['Book Session', 'Tell me more'];
       } else if (input.includes('hour') || input.includes('open') || input.includes('time')) {
-        reply = responses.hours;
+        reply = "We're loud and open Mon-Fri: 7AM to 7PM. Saturdays: 9AM to 2PM. Sundays: We're resting our ears.";
         nextReplies = ['Book Session', 'Location'];
       } else if (input.includes('where') || input.includes('location') || input.includes('address')) {
-        reply = responses.location;
+        reply = "We're located in the gritty heart of downtown: 123 Rebel St, Unit 4. Look for the neon safety pin on the door.";
         nextReplies = ['Book Session', 'Hours'];
       } else if (input.includes('hi') || input.includes('hello') || input.includes('yo')) {
         reply = "Yo! Ready to smash some injuries? What's going on?";
         nextReplies = ['Book Session', 'My Back Hurts', 'Hours'];
       }
 
-      addMessage(reply, 'bot');
-      if (nextReplies.length > 0) showQuickReplies(nextReplies);
-    }, 800);
-  }
+      ws.send(JSON.stringify({ reply, nextReplies }));
+    }, 600);
+  });
 
-  // Start the chat
-  initChat();
-</script>
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
 
-</body>
-</html>
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server successfully running on port ${PORT}`);
+});
