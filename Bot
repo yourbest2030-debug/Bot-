@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riff - Punk Physio Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #121212;
+    --neon-yellow: #CCFF00;
+    --punk-pink: #FF0055;
+    --text-white: #F5F5F5;
+    --shadow: 4px 4px 0px #000;
+  }
+
+  body {
+    background-color: #222;
+    background-image: radial-gradient(circle, #333 1px, transparent 1px);
+    background-size: 20px 20px;
+    font-family: 'Special Elite', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  /* Chat Container */
+  .chat-container {
+    width: 380px;
+    height: 600px;
+    background: var(--bg-dark);
+    border: 3px solid var(--neon-yellow);
+    box-shadow: 8px 8px 0px var(--punk-pink);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .chat-header {
+    background: var(--neon-yellow);
+    color: #000;
+    padding: 15px;
+    font-family: 'Anton', sans-serif;
+    font-size: 24px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 3px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transform: rotate(-1deg); /* Slight punk tilt */
+    margin: 5px;
+  }
+
+  .status-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--punk-pink);
+    border: 2px solid #000;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+
+  /* Messages Area */
+  .chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .message {
+    max-width: 80%;
+    padding: 12px 15px;
+    font-size: 15px;
+    line-height: 1.4;
+    position: relative;
+    border: 2px solid #000;
+  }
+
+  .bot-msg {
+    background: var(--punk-pink);
+    color: var(--text-white);
+    align-self: flex-start;
+    box-shadow: var(--shadow);
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 90% 100%, 0 100%); /* Jagged edge */
+    padding-bottom: 20px;
+  }
+
+  .user-msg {
+    background: var(--neon-yellow);
+    color: #000;
+    align-self: flex-end;
+    box-shadow: var(--shadow);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 10% 100%, 0 85%); /* Jagged edge */
+    padding-bottom: 20px;
+  }
+
+  /* Quick Replies */
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 20px 10px 20px;
+  }
+
+  .quick-btn {
+    background: transparent;
+    border: 2px dashed var(--neon-yellow);
+    color: var(--neon-yellow);
+    padding: 8px 12px;
+    font-family: 'Special Elite', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .quick-btn:hover {
+    background: var(--neon-yellow);
+    color: #000;
+    border-style: solid;
+    transform: translate(-2px, -2px);
+    box-shadow: 2px 2px 0px var(--punk-pink);
+  }
+
+  /* Input Area */
+  .chat-input {
+    display: flex;
+    border-top: 3px solid var(--neon-yellow);
+    background: #1a1a1a;
+  }
+
+  .chat-input input {
+    flex: 1;
+    padding: 15px;
+    background: transparent;
+    border: none;
+    color: var(--text-white);
+    font-family: 'Special Elite', monospace;
+    font-size: 16px;
+    outline: none;
+  }
+
+  .chat-input input::placeholder {
+    color: #666;
+  }
+
+  .chat-input button {
+    background: var(--punk-pink);
+    border: none;
+    color: white;
+    padding: 0 20px;
+    font-family: 'Anton', sans-serif;
+    font-size: 20px;
+    cursor: pointer;
+    border-left: 3px solid var(--neon-yellow);
+  }
+
+  .chat-input button:hover {
+    background: var(--neon-yellow);
+    color: #000;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: var(--punk-pink); }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <span>⚡ RIFF: REBEL REHAB</span>
+    <div class="status-dot"></div>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <!-- Messages will be injected here -->
+  </div>
+
+  <div class="quick-replies" id="quickReplies">
+    <!-- Quick replies injected here -->
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Type your pain... or just say hi." onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()">SMASH ⚡</button>
+  </div>
+</div>
+
+<script>
+  const chatMessages = document.getElementById('chatMessages');
+  const userInput = document.getElementById('userInput');
+  const quickRepliesContainer = document.getElementById('quickReplies');
+
+  // Punk Persona Responses
+  const responses = {
+    greeting: "Yo. I'm Riff. You hurt? Let's fix it. No corporate BS, just get you back in the mosh pit. What's busted?",
+    book: "Let's get you on the table. I can book you for a 'Smash & Fix' session. When do you want to come in? (Type a day/time)",
+    pain: "Pain is just weakness leaving the body... but seriously, let's not ignore it. Where does it hurt? Back, knee, neck?",
+    back: "Lower back? Classic. You've been sitting too long or lifting wrong. We'll crack that open and get you moving. Book a session?",
+    knee: "Knee acting up? We'll rebuild that joint like a vintage amp. Let's get you in for an assessment.",
+    hours: "We're loud and open Mon-Fri: 7AM to 7PM. Saturdays: 9AM to 2PM. Sundays: We're resting our ears.",
+    location: "We're located in the gritty heart of downtown: 123 Rebel St, Unit 4. Look for the neon safety pin on the door.",
+    default: "I didn't catch that, man. My ears are ringing. Try asking to 'book', asking about 'pain', or check our 'hours'."
+  };
+
+  // Initial Bot Message
+  function initChat() {
+    addMessage(responses.greeting, 'bot');
+    showQuickReplies(['Book Session', 'My Back Hurts', 'Hours', 'Location']);
+  }
+
+  function addMessage(text, sender) {
+    const msgDiv = document.createElement('div');
+    msgDiv.classList.add('message', sender === 'bot' ? 'bot-msg' : 'user-msg');
+    msgDiv.innerText = text;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showQuickReplies(options) {
+    quickRepliesContainer.innerHTML = '';
+    options.forEach(option => {
+      const btn = document.createElement('button');
+      btn.classList.add('quick-btn');
+      btn.innerText = option;
+      btn.onclick = () => handleQuickReply(option);
+      quickRepliesContainer.appendChild(btn);
+    });
+  }
+
+  function handleQuickReply(text) {
+    addMessage(text, 'user');
+    quickRepliesContainer.innerHTML = ''; // Clear buttons
+    processInput(text.toLowerCase());
+  }
+
+  function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text) return;
+    
+    addMessage(text, 'user');
+    userInput.value = '';
+    processInput(text.toLowerCase());
+  }
+
+  function handleEnter(event) {
+    if (event.key === 'Enter') sendMessage();
+  }
+
+  function processInput(input) {
+    // Simulate typing delay
+    setTimeout(() => {
+      let reply = responses.default;
+      let nextReplies = [];
+
+      if (input.includes('book') || input.includes('appointment') || input.includes('session')) {
+        reply = responses.book;
+        nextReplies = ['Tomorrow', 'Next Week', 'Nevermind'];
+      } else if (input.includes('hurt') || input.includes('pain') || input.includes('busted')) {
+        reply = responses.pain;
+        nextReplies = ['Back', 'Knee', 'Neck', 'Shoulder'];
+      } else if (input.includes('back')) {
+        reply = responses.back;
+        nextReplies = ['Book Session', 'Tell me more'];
+      } else if (input.includes('knee')) {
+        reply = responses.knee;
+        nextReplies = ['Book Session', 'Tell me more'];
+      } else if (input.includes('hour') || input.includes('open') || input.includes('time')) {
+        reply = responses.hours;
+        nextReplies = ['Book Session', 'Location'];
+      } else if (input.includes('where') || input.includes('location') || input.includes('address')) {
+        reply = responses.location;
+        nextReplies = ['Book Session', 'Hours'];
+      } else if (input.includes('hi') || input.includes('hello') || input.includes('yo')) {
+        reply = "Yo! Ready to smash some injuries? What's going on?";
+        nextReplies = ['Book Session', 'My Back Hurts', 'Hours'];
+      }
+
+      addMessage(reply, 'bot');
+      if (nextReplies.length > 0) showQuickReplies(nextReplies);
+    }, 800);
+  }
+
+  // Start the chat
+  initChat();
+</script>
+
+</body>
+</html>
