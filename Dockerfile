@@ -1,17 +1,9 @@
 FROM nginx:alpine
 
-# Copy your HTML file to nginx's default directory
+# Copy your HTML file
 COPY Bot/index.html /usr/share/nginx/html/index.html
 
-# Configure nginx to use Railway's PORT
-RUN echo 'server { \
-    listen ${PORT}; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
-
+# Nginx defaults to port 80, which is fine
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
