@@ -6,17 +6,21 @@ const html = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Physiotherapy Assistant</title>
+<title>Physiotherapy Clinic</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #9c4256; /* Elegant Maroon */
-    --primary-light: #fdf2f4; /* Soft Pink Background */
-    --text-dark: #333333;
+    --primary: #b8737f;
+    --primary-dark: #9c5a66;
+    --primary-light: #f5e6e8;
+    --bg-soft: #fdf8f9;
+    --text-dark: #4a3035;
     --text-light: #ffffff;
+    --accent: #d4a5a5;
   }
   body {
-    background-color: #f4f4f9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #fdf8f9 0%, #f5e6e8 100%);
+    font-family: 'Inter', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -25,114 +29,185 @@ const html = `<!DOCTYPE html>
   }
   .chat-container {
     width: 100%;
-    max-width: 400px;
-    height: 90vh;
-    max-height: 700px;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 420px;
+    height: 92vh;
+    max-height: 750px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(184, 115, 127, 0.15);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border: 1px solid rgba(184, 115, 127, 0.1);
   }
   .chat-header {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: var(--text-light);
-    padding: 20px;
-    font-size: 20px;
-    font-weight: 600;
+    padding: 24px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2);
+  }
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+  .header-text p {
+    font-size: 11px;
+    opacity: 0.9;
+    margin: 2px 0 0 0;
+    font-weight: 300;
+  }
+  .close-btn {
+    cursor: pointer;
+    font-size: 24px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .close-btn:hover {
+    opacity: 1;
   }
   .chat-messages {
     flex: 1;
-    padding: 20px;
+    padding: 24px 20px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    background: var(--primary-light);
+    gap: 16px;
+    background: var(--bg-soft);
   }
   .message {
-    max-width: 80%;
-    padding: 12px 16px;
-    font-size: 15px;
-    line-height: 1.5;
-    border-radius: 18px;
+    max-width: 82%;
+    padding: 14px 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    border-radius: 20px;
+    font-weight: 400;
   }
   .bot-msg {
     background: #ffffff;
     color: var(--text-dark);
     align-self: flex-start;
-    border-bottom-left-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-bottom-left-radius: 6px;
+    box-shadow: 0 2px 8px rgba(184, 115, 127, 0.08);
+    border: 1px solid rgba(184, 115, 127, 0.1);
   }
   .user-msg {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: var(--text-light);
     align-self: flex-end;
-    border-bottom-right-radius: 4px;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 2px 8px rgba(156, 90, 102, 0.2);
   }
   .quick-replies {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 0 20px 10px 20px;
-    background: var(--primary-light);
+    gap: 10px;
+    padding: 16px 20px;
+    background: var(--bg-soft);
+    border-top: 1px solid rgba(184, 115, 127, 0.1);
   }
   .quick-btn {
     background: #ffffff;
-    border: 1px solid var(--primary);
+    border: 1.5px solid var(--primary);
     color: var(--primary);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    font-family: 'Inter', sans-serif;
   }
   .quick-btn:hover {
     background: var(--primary);
     color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 115, 127, 0.25);
   }
   .chat-input {
     display: flex;
-    padding: 15px;
-    background: #fff;
-    border-top: 1px solid #eee;
-    gap: 10px;
+    padding: 16px 20px;
+    background: #ffffff;
+    border-top: 1px solid rgba(184, 115, 127, 0.1);
+    gap: 12px;
+    align-items: center;
   }
   .chat-input input {
     flex: 1;
-    padding: 12px 15px;
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 25px;
+    padding: 14px 18px;
+    background: var(--bg-soft);
+    border: 1.5px solid rgba(184, 115, 127, 0.2);
+    border-radius: 28px;
     color: var(--text-dark);
-    font-size: 15px;
+    font-size: 14px;
     outline: none;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+  }
+  .chat-input input:focus {
+    border-color: var(--primary);
+  }
+  .chat-input input::placeholder {
+    color: #b8a0a5;
   }
   .chat-input button {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border: none;
     color: white;
-    padding: 0 20px;
-    border-radius: 25px;
+    padding: 14px 22px;
+    border-radius: 28px;
     font-weight: 600;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2);
   }
+  .chat-input button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(156, 90, 102, 0.3);
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 </style>
 </head>
 <body>
 <div class="chat-container">
   <div class="chat-header">
-    <span>🛡️ Physiotherapy</span>
-    <span style="cursor:pointer; font-size:24px;">&times;</span>
+    <div class="header-content">
+      <div class="logo-icon"></div>
+      <div class="header-text">
+        <h1>Physiotherapy Clinic</h1>
+        <p>Professional Care & Rehabilitation</p>
+      </div>
+    </div>
+    <span class="close-btn">&times;</span>
   </div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="quick-replies" id="quickReplies"></div>
   <div class="chat-input">
-    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="handleEnter(event)">
+    <input type="text" id="userInput" placeholder="Type your message..." onkeypress="handleEnter(event)">
     <button onclick="sendMessage()">Send</button>
   </div>
 </div>
@@ -140,20 +215,26 @@ const html = `<!DOCTYPE html>
 const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
 const quickRepliesContainer = document.getElementById('quickReplies');
+
+let currentContext = null;
+
 const responses = {
-  greeting: "Hello! Welcome to our Physiotherapy clinic. How can I help you today?",
-  book: "I can help you book an assessment. What day and time works best for you?",
-  pain: "I'm sorry to hear you're in pain. Could you tell me where it hurts?",
-  back: "Lower back pain is very common. We can definitely help with that. Would you like to book a session?",
-  knee: "Knee issues can be tricky. We'll do a full mobility assessment. Shall we book you in?",
-  hours: "We are open Monday to Friday, 8 AM to 6 PM.",
-  location: "We are located at 123 Medical Center Drive, Suite 100.",
-  default: "I didn't quite catch that. Could you please rephrase, or choose an option below?"
+  greeting: "Welcome to our Physiotherapy Clinic. How can I support your health and recovery journey today?",
+  book: "I'd be happy to help you book a consultation. What day and time works best for you?",
+  pain: "I understand you're experiencing discomfort. Could you tell me more about your symptoms?",
+  hours: "Our clinic hours are Monday to Friday, 8 AM to 6 PM, and Saturday 9 AM to 1 PM. Would you like to schedule a visit?",
+  location: "We're located at 123 Medical Center Drive, Suite 100. Would you like directions or to book an appointment?",
+  anatomy: "Our clinic specializes in musculoskeletal and pelvic floor rehabilitation. Would you like to know more about our specific treatment areas?",
+  assessment: "Our clinical assessment follows evidence-based protocols including patient history, subjective and objective assessment, and functional movement analysis. Shall I explain more?",
+  treatment: "We offer comprehensive treatment including manual therapy, personalized exercise programs, breathing techniques, and patient education. What would you like to know more about?",
+  default: "I'm here to help. You can ask about booking, our services, clinic hours, or tell me about your symptoms."
 };
+
 function initChat() {
   addMessage(responses.greeting, 'bot');
-  showQuickReplies(['Book Session', 'My Back Hurts', 'Opening Hours']);
+  showQuickReplies(['Book Consultation', 'Our Services', 'Clinic Hours']);
 }
+
 function addMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.classList.add('message', sender === 'bot' ? 'bot-msg' : 'user-msg');
@@ -161,6 +242,7 @@ function addMessage(text, sender) {
   chatMessages.appendChild(msgDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+
 function showQuickReplies(options) {
   quickRepliesContainer.innerHTML = '';
   options.forEach(option => {
@@ -171,11 +253,13 @@ function showQuickReplies(options) {
     quickRepliesContainer.appendChild(btn);
   });
 }
+
 function handleQuickReply(text) {
   addMessage(text, 'user');
   quickRepliesContainer.innerHTML = '';
   processInput(text.toLowerCase());
 }
+
 function sendMessage() {
   const text = userInput.value.trim();
   if (!text) return;
@@ -183,36 +267,114 @@ function sendMessage() {
   userInput.value = '';
   processInput(text.toLowerCase());
 }
+
 function handleEnter(event) {
   if (event.key === 'Enter') sendMessage();
 }
+
 function processInput(input) {
   setTimeout(() => {
     let reply = responses.default;
     let nextReplies = [];
-    if (input.includes('book') || input.includes('appointment')) {
+    const text = input.toLowerCase().trim();
+
+    if (['hi', 'hello', 'hey', 'salam', 'greetings', 'good morning', 'good afternoon'].some(w => text.includes(w))) {
+      reply = "Hello! Welcome to our Physiotherapy Clinic. How can I support your recovery today?";
+      nextReplies = ['Book Consultation', 'Our Services', 'Clinic Hours'];
+      currentContext = null;
+    } 
+    else if (['thanks', 'thank you', 'bye', 'goodbye', 'no thanks'].some(w => text.includes(w))) {
+      reply = "You're very welcome! Wishing you health and wellness. 🌸";
+      nextReplies = [];
+      currentContext = null;
+    }
+    else if (currentContext === 'booking_time') {
+      const timeWords = ['am', 'pm', 'morning', 'afternoon', 'evening', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'tomorrow', 'today', 'next week', 'weekend'];
+      const isTime = timeWords.some(w => text.includes(w)) || /\d{1,2}/.test(text);
+      
+      if (isTime) {
+        reply = "Wonderful! I've noted your preference for " + input + ". Our care coordinator will contact you shortly to confirm your appointment. Is there anything else I can help with?";
+        nextReplies = ['Clinic Hours', 'Location', 'No, thanks'];
+        currentContext = null;
+      } else {
+        reply = "Could you please specify a preferred day or time? For example, 'Tuesday morning' or 'Next week'.";
+        nextReplies = ['Tomorrow', 'Next Week'];
+      }
+    }
+    else if (currentContext === 'symptoms') {
+      const symptomWords = ['pain', 'discomfort', 'weakness', 'pressure', 'stiffness', 'injury', 'sprain', 'strain'];
+      const isSymptom = symptomWords.some(w => text.includes(w));
+      
+      if (isSymptom) {
+        reply = "Thank you for sharing. Our physiotherapists are highly experienced in treating these concerns. Would you like to book a comprehensive assessment?";
+        nextReplies = ['Book Consultation', 'Learn More'];
+        currentContext = 'booking_time';
+      } else {
+        reply = "Could you describe your symptoms? For example, pain, stiffness, or a specific injury?";
+        nextReplies = ['Pain', 'Stiffness', 'Injury'];
+      }
+    }
+    else if (['book', 'appointment', 'schedule', 'consultation', 'session', 'reserve', 'visit'].some(w => text.includes(w))) {
       reply = responses.book;
       nextReplies = ['Tomorrow', 'Next Week'];
-    } else if (input.includes('hurt') || input.includes('pain')) {
+      currentContext = 'booking_time';
+    } 
+    else if (['hurt', 'pain', 'ache', 'sore', 'symptoms', 'discomfort', 'problem', 'issue'].some(w => text.includes(w))) {
       reply = responses.pain;
-      nextReplies = ['Back', 'Knee', 'Neck'];
-    } else if (input.includes('back')) {
-      reply = responses.back;
-      nextReplies = ['Book Session', 'Tell me more'];
-    } else if (input.includes('knee')) {
-      reply = responses.knee;
-      nextReplies = ['Book Session'];
-    } else if (input.includes('hour') || input.includes('open')) {
+      nextReplies = ['Back Pain', 'Knee Pain', 'Neck Pain', 'Shoulder Pain'];
+      currentContext = 'symptoms';
+    } 
+    else if (['hour', 'open', 'close', 'time', 'schedule', 'when'].some(w => text.includes(w))) {
       reply = responses.hours;
-      nextReplies = ['Book Session', 'Location'];
-    } else if (input.includes('hi') || input.includes('hello')) {
-      reply = "Hi there! How can I assist you with your recovery today?";
-      nextReplies = ['Book Session', 'Opening Hours'];
+      nextReplies = ['Book Consultation', 'Location'];
+      currentContext = null;
+    } 
+    else if (['location', 'address', 'where', 'map', 'find you', 'clinic', 'directions'].some(w => text.includes(w))) {
+      reply = responses.location;
+      nextReplies = ['Book Consultation', 'Hours'];
+      currentContext = null;
     }
+    else if (['service', 'treatment', 'offer', 'provide', 'what do you do'].some(w => text.includes(w))) {
+      reply = "We specialize in musculoskeletal and pelvic floor rehabilitation, including manual therapy, personalized exercise programs, and post-operative recovery. What would you like to know more about?";
+      nextReplies = ['Assessment', 'Treatment', 'Book Consultation'];
+      currentContext = null;
+    }
+    else if (['anatomy', '3d', 'model', 'learn', 'education'].some(w => text.includes(w))) {
+      reply = responses.anatomy;
+      nextReplies = ['Musculoskeletal', 'Pelvic Floor', 'Book Consultation'];
+      currentContext = null;
+    }
+    else if (['assessment', 'evaluate', 'examine', 'check'].some(w => text.includes(w))) {
+      reply = responses.assessment;
+      nextReplies = ['Book Consultation', 'Treatment Options'];
+      currentContext = null;
+    }
+    else if (['treatment', 'therapy', 'exercise', 'rehab', 'recovery', 'manual'].some(w => text.includes(w))) {
+      reply = responses.treatment;
+      nextReplies = ['Book Consultation', 'Learn More'];
+      currentContext = null;
+    }
+    else if (['female', 'women', 'pregnancy', 'postpartum', 'maternal', 'pelvic'].some(w => text.includes(w))) {
+      reply = "We specialize in women's health and pelvic floor physiotherapy, including pregnancy and postpartum recovery. Would you like to book a consultation?";
+      nextReplies = ['Book Consultation', 'Learn More'];
+      currentContext = 'booking_time';
+    }
+    else if (['male', 'men', 'prostate', 'sports'].some(w => text.includes(w))) {
+      reply = "We also provide specialized pelvic floor therapy for men, as well as sports injury rehabilitation. Would you like to learn more?";
+      nextReplies = ['Book Consultation', 'Learn More'];
+      currentContext = 'booking_time';
+    }
+    else if (['back', 'knee', 'neck', 'shoulder', 'leg', 'arm', 'hip', 'ankle', 'wrist'].some(w => text.includes(w))) {
+      reply = "I'm sorry to hear your " + input + " is bothering you. Our physiotherapists can definitely help with that. Would you like to book an assessment?";
+      nextReplies = ['Book Consultation', 'Tell me more'];
+      currentContext = 'booking_time';
+    }
+
     addMessage(reply, 'bot');
     if (nextReplies.length > 0) showQuickReplies(nextReplies);
-  }, 800);
+  }, 600);
 }
+
 initChat();
 </script>
 </body>
