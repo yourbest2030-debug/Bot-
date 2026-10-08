@@ -1,9 +1,12 @@
 FROM nginx:alpine
 
-# Copy your HTML file
+# Copy your HTML
 COPY Bot/index.html /usr/share/nginx/html/index.html
 
-# Nginx defaults to port 80, which is fine
+# Create nginx config template that uses PORT variable
+RUN mkdir -p /etc/nginx/templates
+COPY default.conf.template /etc/nginx/templates/default.conf.template
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
