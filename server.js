@@ -87,8 +87,8 @@ const server = http.createServer(async (req, res) => {
         let aiReply = "I'm having a little trouble thinking right now. Could you please rephrase that?";
         
         if (GEMINI_API_KEY) {
-          // Updated to use the correct model endpoint
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+          // Updated to use the correct gemini-3.8-flash model endpoint
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_API_KEY}`;
           
           const response = await fetch(url, {
             method: 'POST', 
