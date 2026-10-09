@@ -1,129 +1,390 @@
 const http = require('http');
 const PORT = process.env.PORT || 3000;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Physiotherapy Clinic - AI Assistant</title>
+<title>Physiotherapy Clinic</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #b8737f; --primary-dark: #9c5a66; --primary-light: #f5e6e8; --bg-soft: #fdf8f9; --text-dark: #4a3035; --text-light: #ffffff;
+    --primary: #b8737f;
+    --primary-dark: #9c5a66;
+    --primary-light: #f5e6e8;
+    --bg-soft: #fdf8f9;
+    --text-dark: #4a3035;
+    --text-light: #ffffff;
+    --accent: #d4a5a5;
   }
-  body { background: linear-gradient(135deg, #fdf8f9 0%, #f5e6e8 100%); font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-  .chat-container { width: 100%; max-width: 420px; height: 92vh; max-height: 750px; background: #ffffff; border-radius: 24px; box-shadow: 0 20px 60px rgba(184, 115, 127, 0.15); display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(184, 115, 127, 0.1); }
-  .chat-header { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: var(--text-light); padding: 20px; display: flex; align-items: center; justify-content: space-between; }
-  .header-content { display: flex; align-items: center; gap: 12px; }
-  .header-text h1 { font-family: 'Playfair Display', serif; font-size: 18px; margin: 0; }
-  .header-text p { font-size: 11px; opacity: 0.9; margin: 2px 0 0 0; }
-  .voice-indicator { font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; display: none; }
-  .voice-indicator.active { display: block; animation: pulse 1.5s infinite; }
-  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-  .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: var(--bg-soft); }
-  .message { max-width: 82%; padding: 14px 18px; font-size: 14px; line-height: 1.6; border-radius: 20px; }
-  .bot-msg { background: #ffffff; color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 6px; box-shadow: 0 2px 8px rgba(184, 115, 127, 0.08); border: 1px solid rgba(184, 115, 127, 0.1); }
-  .user-msg { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: var(--text-light); align-self: flex-end; border-bottom-right-radius: 6px; }
-  .chat-input { display: flex; padding: 16px; background: #ffffff; border-top: 1px solid rgba(184, 115, 127, 0.1); gap: 10px; align-items: center; }
-  .chat-input input { flex: 1; padding: 14px 18px; background: var(--bg-soft); border: 1.5px solid rgba(184, 115, 127, 0.2); border-radius: 28px; color: var(--text-dark); font-size: 14px; outline: none; font-family: 'Inter', sans-serif; }
-  .icon-btn { background: none; border: none; cursor: pointer; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-  .icon-btn:hover { background: var(--primary-light); }
-  .icon-btn svg { width: 24px; height: 24px; fill: var(--primary); }
-  .icon-btn.listening { background: var(--primary); }
-  .icon-btn.listening svg { fill: white; animation: pulse 1s infinite; }
-  .send-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border: none; color: white; padding: 12px 20px; border-radius: 28px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #fdf8f9 0%, #f5e6e8 100%);
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .chat-container {
+    width: 100%;
+    max-width: 420px;
+    height: 92vh;
+    max-height: 750px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(184, 115, 127, 0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(184, 115, 127, 0.1);
+  }
+  .chat-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--text-light);
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2);
+  }
+  .header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+  .header-text p {
+    font-size: 11px;
+    opacity: 0.9;
+    margin: 2px 0 0 0;
+    font-weight: 300;
+  }
+  .close-btn {
+    cursor: pointer;
+    font-size: 24px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .close-btn:hover {
+    opacity: 1;
+  }
+  .chat-messages {
+    flex: 1;
+    padding: 24px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-soft);
+  }
+  .message {
+    max-width: 82%;
+    padding: 14px 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    border-radius: 20px;
+    font-weight: 400;
+  }
+  .bot-msg {
+    background: #ffffff;
+    color: var(--text-dark);
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+    box-shadow: 0 2px 8px rgba(184, 115, 127, 0.08);
+    border: 1px solid rgba(184, 115, 127, 0.1);
+  }
+  .user-msg {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--text-light);
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 2px 8px rgba(156, 90, 102, 0.2);
+  }
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 20px;
+    background: var(--bg-soft);
+    border-top: 1px solid rgba(184, 115, 127, 0.1);
+  }
+  .quick-btn {
+    background: #ffffff;
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: 'Inter', sans-serif;
+  }
+  .quick-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 115, 127, 0.25);
+  }
+  .chat-input {
+    display: flex;
+    padding: 16px 20px;
+    background: #ffffff;
+    border-top: 1px solid rgba(184, 115, 127, 0.1);
+    gap: 12px;
+    align-items: center;
+  }
+  .chat-input input {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--bg-soft);
+    border: 1.5px solid rgba(184, 115, 127, 0.2);
+    border-radius: 28px;
+    color: var(--text-dark);
+    font-size: 14px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+  }
+  .chat-input input:focus {
+    border-color: var(--primary);
+  }
+  .chat-input input::placeholder {
+    color: #b8a0a5;
+  }
+  .chat-input button {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 28px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2);
+  }
+  .chat-input button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(156, 90, 102, 0.3);
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 </style>
 </head>
 <body>
 <div class="chat-container">
   <div class="chat-header">
     <div class="header-content">
-      <div class="header-text"><h1>Physiotherapy Clinic</h1><p>AI-Powered Care Assistant</p></div>
+      <div class="logo-icon"></div>
+      <div class="header-text">
+        <h1>Physiotherapy Clinic</h1>
+        <p>Professional Care & Rehabilitation</p>
+      </div>
     </div>
-    <div class="voice-indicator" id="voiceIndicator">Listening...</div>
+    <span class="close-btn">&times;</span>
   </div>
   <div class="chat-messages" id="chatMessages"></div>
+  <div class="quick-replies" id="quickReplies"></div>
   <div class="chat-input">
-    <button class="icon-btn" id="micBtn" title="Speak"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg></button>
-    <input type="text" id="userInput" placeholder="Type or speak your message..." onkeypress="handleEnter(event)">
-    <button class="send-btn" onclick="sendMessage()">Send</button>
+    <input type="text" id="userInput" placeholder="Type your message..." onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()">Send</button>
   </div>
 </div>
 <script>
-const chatMessages = document.getElementById('chatMessages'); const userInput = document.getElementById('userInput'); const micBtn = document.getElementById('micBtn'); const voiceIndicator = document.getElementById('voiceIndicator');
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; let recognition = null; let isListening = false;
-if (SpeechRecognition) { recognition = new SpeechRecognition(); recognition.continuous = false; recognition.interimResults = false; recognition.lang = 'en-US'; recognition.onstart = () => { isListening = true; micBtn.classList.add('listening'); voiceIndicator.classList.add('active'); }; recognition.onend = () => { isListening = false; micBtn.classList.remove('listening'); voiceIndicator.classList.remove('active'); }; recognition.onresult = (event) => { userInput.value = event.results[0][0].transcript; sendMessage(); }; } else { micBtn.style.display = 'none'; }
-micBtn.addEventListener('click', () => { if (!recognition) return; if (isListening) recognition.stop(); else recognition.start(); });
-function speakText(text) { if ('speechSynthesis' in window) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 1; u.pitch = 1; u.volume = 1; window.speechSynthesis.speak(u); } }
-function addMessage(text, sender) { const d = document.createElement('div'); d.classList.add('message', sender === 'bot' ? 'bot-msg' : 'user-msg'); d.innerText = text; chatMessages.appendChild(d); chatMessages.scrollTop = chatMessages.scrollHeight; }
-function sendMessage() { const text = userInput.value.trim(); if (!text) return; addMessage(text, 'user'); userInput.value = ''; const t = document.createElement('div'); t.classList.add('message', 'bot-msg'); t.innerText = '...'; t.id = 'typingIndicator'; chatMessages.appendChild(t); chatMessages.scrollTop = chatMessages.scrollHeight;
-  fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text }) })
-  .then(res => res.json()).then(data => { document.getElementById('typingIndicator').remove(); addMessage(data.reply || "Error connecting.", 'bot'); speakText(data.reply || "Error connecting."); })
-  .catch(err => { document.getElementById('typingIndicator').remove(); addMessage("Connection error.", 'bot'); });
+const chatMessages = document.getElementById('chatMessages');
+const userInput = document.getElementById('userInput');
+const quickRepliesContainer = document.getElementById('quickReplies');
+
+let currentContext = null;
+
+const responses = {
+  greeting: "Welcome to our Physiotherapy Clinic. How can I support your health and recovery journey today?",
+  book: "I'd be happy to help you book a consultation. What day and time works best for you?",
+  pain: "I understand you're experiencing discomfort. Could you tell me more about your symptoms?",
+  hours: "Our clinic hours are Monday to Friday, 8 AM to 6 PM, and Saturday 9 AM to 1 PM. Would you like to schedule a visit?",
+  location: "We're located at 123 Medical Center Drive, Suite 100. Would you like directions or to book an appointment?",
+  anatomy: "Our clinic specializes in musculoskeletal and pelvic floor rehabilitation. Would you like to know more about our specific treatment areas?",
+  assessment: "Our clinical assessment follows evidence-based protocols including patient history, subjective and objective assessment, and functional movement analysis. Shall I explain more?",
+  treatment: "We offer comprehensive treatment including manual therapy, personalized exercise programs, breathing techniques, and patient education. What would you like to know more about?",
+  default: "I'm here to help. You can ask about booking, our services, clinic hours, or tell me about your symptoms."
+};
+
+function initChat() {
+  addMessage(responses.greeting, 'bot');
+  showQuickReplies(['Book Consultation', 'Our Services', 'Clinic Hours']);
 }
-function handleEnter(event) { if (event.key === 'Enter') sendMessage(); }
-addMessage("Hello! Welcome to our Physiotherapy Clinic. How can I support your health journey today?", 'bot');
+
+function addMessage(text, sender) {
+  const msgDiv = document.createElement('div');
+  msgDiv.classList.add('message', sender === 'bot' ? 'bot-msg' : 'user-msg');
+  msgDiv.innerText = text;
+  chatMessages.appendChild(msgDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showQuickReplies(options) {
+  quickRepliesContainer.innerHTML = '';
+  options.forEach(option => {
+    const btn = document.createElement('button');
+    btn.classList.add('quick-btn');
+    btn.innerText = option;
+    btn.onclick = () => handleQuickReply(option);
+    quickRepliesContainer.appendChild(btn);
+  });
+}
+
+function handleQuickReply(text) {
+  addMessage(text, 'user');
+  quickRepliesContainer.innerHTML = '';
+  processInput(text.toLowerCase());
+}
+
+function sendMessage() {
+  const text = userInput.value.trim();
+  if (!text) return;
+  addMessage(text, 'user');
+  userInput.value = '';
+  processInput(text.toLowerCase());
+}
+
+function handleEnter(event) {
+  if (event.key === 'Enter') sendMessage();
+}
+
+function processInput(input) {
+  setTimeout(() => {
+    let reply = responses.default;
+    let nextReplies = [];
+    const text = input.toLowerCase().trim();
+
+    if (['hi', 'hello', 'hey', 'salam', 'greetings', 'good morning', 'good afternoon'].some(w => text.includes(w))) {
+      reply = "Hello! Welcome to our Physiotherapy Clinic. How can I support your recovery today?";
+      nextReplies = ['Book Consultation', 'Our Services', 'Clinic Hours'];
+      currentContext = null;
+    } 
+    else if (['thanks', 'thank you', 'bye', 'goodbye', 'no thanks'].some(w => text.includes(w))) {
+      reply = "You're very welcome! Wishing you health and wellness. 🌸";
+      nextReplies = [];
+      currentContext = null;
+    }
+    else if (currentContext === 'booking_time') {
+      const timeWords = ['am', 'pm', 'morning', 'afternoon', 'evening', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'tomorrow', 'today', 'next week', 'weekend'];
+      const isTime = timeWords.some(w => text.includes(w)) || /\d{1,2}/.test(text);
+      
+      if (isTime) {
+        reply = "Wonderful! I've noted your preference for " + input + ". Our care coordinator will contact you shortly to confirm your appointment. Is there anything else I can help with?";
+        nextReplies = ['Clinic Hours', 'Location', 'No, thanks'];
+        currentContext = null;
+      } else {
+        reply = "Could you please specify a preferred day or time? For example, 'Tuesday morning' or 'Next week'.";
+        nextReplies = ['Tomorrow', 'Next Week'];
+      }
+    }
+    else if (currentContext === 'symptoms') {
+      const symptomWords = ['pain', 'discomfort', 'weakness', 'pressure', 'stiffness', 'injury', 'sprain', 'strain'];
+      const isSymptom = symptomWords.some(w => text.includes(w));
+      
+      if (isSymptom) {
+        reply = "Thank you for sharing. Our physiotherapists are highly experienced in treating these concerns. Would you like to book a comprehensive assessment?";
+        nextReplies = ['Book Consultation', 'Learn More'];
+        currentContext = 'booking_time';
+      } else {
+        reply = "Could you describe your symptoms? For example, pain, stiffness, or a specific injury?";
+        nextReplies = ['Pain', 'Stiffness', 'Injury'];
+      }
+    }
+    else if (['book', 'appointment', 'schedule', 'consultation', 'session', 'reserve', 'visit'].some(w => text.includes(w))) {
+      reply = responses.book;
+      nextReplies = ['Tomorrow', 'Next Week'];
+      currentContext = 'booking_time';
+    } 
+    else if (['hurt', 'pain', 'ache', 'sore', 'symptoms', 'discomfort', 'problem', 'issue'].some(w => text.includes(w))) {
+      reply = responses.pain;
+      nextReplies = ['Back Pain', 'Knee Pain', 'Neck Pain', 'Shoulder Pain'];
+      currentContext = 'symptoms';
+    } 
+    else if (['hour', 'open', 'close', 'time', 'schedule', 'when'].some(w => text.includes(w))) {
+      reply = responses.hours;
+      nextReplies = ['Book Consultation', 'Location'];
+      currentContext = null;
+    } 
+    else if (['location', 'address', 'where', 'map', 'find you', 'clinic', 'directions'].some(w => text.includes(w))) {
+      reply = responses.location;
+      nextReplies = ['Book Consultation', 'Hours'];
+      currentContext = null;
+    }
+    else if (['service', 'treatment', 'offer', 'provide', 'what do you do'].some(w => text.includes(w))) {
+      reply = "We specialize in musculoskeletal and pelvic floor rehabilitation, including manual therapy, personalized exercise programs, and post-operative recovery. What would you like to know more about?";
+      nextReplies = ['Assessment', 'Treatment', 'Book Consultation'];
+      currentContext = null;
+    }
+    else if (['anatomy', '3d', 'model', 'learn', 'education'].some(w => text.includes(w))) {
+      reply = responses.anatomy;
+      nextReplies = ['Musculoskeletal', 'Pelvic Floor', 'Book Consultation'];
+      currentContext = null;
+    }
+    else if (['assessment', 'evaluate', 'examine', 'check'].some(w => text.includes(w))) {
+      reply = responses.assessment;
+      nextReplies = ['Book Consultation', 'Treatment Options'];
+      currentContext = null;
+    }
+    else if (['treatment', 'therapy', 'exercise', 'rehab', 'recovery', 'manual'].some(w => text.includes(w))) {
+      reply = responses.treatment;
+      nextReplies = ['Book Consultation', 'Learn More'];
+      currentContext = null;
+    }
+    else if (['female', 'women', 'pregnancy', 'postpartum', 'maternal', 'pelvic'].some(w => text.includes(w))) {
+      reply = "We specialize in women's health and pelvic floor physiotherapy, including pregnancy and postpartum recovery. Would you like to book a consultation?";
+      nextReplies = ['Book Consultation', 'Learn More'];
+      currentContext = 'booking_time';
+    }
+    else if (['male', 'men', 'prostate', 'sports'].some(w => text.includes(w))) {
+      reply = "We also provide specialized pelvic floor therapy for men, as well as sports injury rehabilitation. Would you like to learn more?";
+      nextReplies = ['Book Consultation', 'Learn More'];
+      currentContext = 'booking_time';
+    }
+    else if (['back', 'knee', 'neck', 'shoulder', 'leg', 'arm', 'hip', 'ankle', 'wrist'].some(w => text.includes(w))) {
+      reply = "I'm sorry to hear your " + input + " is bothering you. Our physiotherapists can definitely help with that. Would you like to book an assessment?";
+      nextReplies = ['Book Consultation', 'Tell me more'];
+      currentContext = 'booking_time';
+    }
+
+    addMessage(reply, 'bot');
+    if (nextReplies.length > 0) showQuickReplies(nextReplies);
+  }, 600);
+}
+
+initChat();
 </script>
 </body>
 </html>`;
 
-const SYSTEM_PROMPT = "You are a professional, empathetic AI assistant for a Physiotherapy Clinic. You help patients book appointments, answer questions about clinic hours (Mon-Fri 8AM-6PM, Sat 9AM-1PM), location (123 Medical Center Dr), and provide general, safe information about physiotherapy. Do not give specific medical diagnoses. Keep responses concise (under 3 sentences).";
-
-const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/') { 
-    res.writeHead(200, { 'Content-Type': 'text/html' }); 
-    res.end(html); 
-    return; 
-  }
-  
-  if (req.method === 'POST' && req.url === '/api/chat') {
-    let body = ''; 
-    req.on('data', chunk => { body += chunk.toString(); });
-    req.on('end', async () => {
-      try {
-        const { message } = JSON.parse(body);
-        let aiReply = "I'm having a little trouble thinking right now. Could you please rephrase that?";
-        
-        if (GEMINI_API_KEY) {
-          // Updated to use the correct gemini-3.8-flash model endpoint
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_API_KEY}`;
-          
-          const response = await fetch(url, {
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser: ${message}` }] }] 
-            })
-          });
-          
-          const data = await response.json();
-
-          if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
-            aiReply = data.candidates[0].content.parts[0].text;
-          } else {
-            console.error("GEMINI API ERROR RESPONSE:", JSON.stringify(data));
-          }
-        } else {
-          aiReply = "Please add your GEMINI_API_KEY in Railway Variables!";
-        }
-        
-        res.writeHead(200, { 'Content-Type': 'application/json' }); 
-        res.end(JSON.stringify({ reply: aiReply }));
-      } catch (error) { 
-        console.error("Server Error:", error); 
-        res.writeHead(500, { 'Content-Type': 'application/json' }); 
-        res.end(JSON.stringify({ reply: "Internal server error." })); 
-      }
-    }); 
-    return;
-  }
-  
-  res.writeHead(404); 
-  res.end();
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.end(html);
 });
 
-server.listen(PORT, () => { 
-  console.log(`AI Physio Bot is live on port ${PORT}`); 
+server.listen(PORT, () => {
+  console.log(`Server is live on port ${PORT}`);
 });
