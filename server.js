@@ -8,6 +8,8 @@ const html = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Physiotherapy Clinic</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Flatpickr Calendar CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
   :root {
     --primary: #b8737f;
@@ -49,154 +51,66 @@ const html = `<!DOCTYPE html>
     justify-content: space-between;
     box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2);
   }
-  .header-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-  .header-text h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-    letter-spacing: 0.5px;
-  }
-  .header-text p {
-    font-size: 11px;
-    opacity: 0.9;
-    margin: 2px 0 0 0;
-    font-weight: 300;
-  }
-  .close-btn {
-    cursor: pointer;
-    font-size: 24px;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-  }
-  .close-btn:hover {
-    opacity: 1;
-  }
-  .chat-messages {
-    flex: 1;
-    padding: 24px 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background: var(--bg-soft);
-  }
-  .message {
-    max-width: 82%;
-    padding: 14px 18px;
-    font-size: 14px;
-    line-height: 1.6;
-    border-radius: 20px;
-    font-weight: 400;
-  }
-  .bot-msg {
-    background: #ffffff;
-    color: var(--text-dark);
-    align-self: flex-start;
-    border-bottom-left-radius: 6px;
-    box-shadow: 0 2px 8px rgba(184, 115, 127, 0.08);
-    border: 1px solid rgba(184, 115, 127, 0.1);
-  }
-  .user-msg {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: var(--text-light);
-    align-self: flex-end;
-    border-bottom-right-radius: 6px;
-    box-shadow: 0 2px 8px rgba(156, 90, 102, 0.2);
-  }
-  .quick-replies {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 16px 20px;
-    background: var(--bg-soft);
-    border-top: 1px solid rgba(184, 115, 127, 0.1);
-  }
-  .quick-btn {
-    background: #ffffff;
-    border: 1.5px solid var(--primary);
-    color: var(--primary);
-    padding: 10px 18px;
-    border-radius: 24px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.25s ease;
+  .header-content { display: flex; align-items: center; gap: 12px; }
+  .logo-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .header-text h1 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; margin: 0; letter-spacing: 0.5px; }
+  .header-text p { font-size: 11px; opacity: 0.9; margin: 2px 0 0 0; font-weight: 300; }
+  .close-btn { cursor: pointer; font-size: 24px; opacity: 0.8; transition: opacity 0.2s; }
+  .close-btn:hover { opacity: 1; }
+  
+  .chat-messages { flex: 1; padding: 24px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: var(--bg-soft); }
+  .message { max-width: 82%; padding: 14px 18px; font-size: 14px; line-height: 1.6; border-radius: 20px; font-weight: 400; }
+  .bot-msg { background: #ffffff; color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 6px; box-shadow: 0 2px 8px rgba(184, 115, 127, 0.08); border: 1px solid rgba(184, 115, 127, 0.1); }
+  .user-msg { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: var(--text-light); align-self: flex-end; border-bottom-right-radius: 6px; box-shadow: 0 2px 8px rgba(156, 90, 102, 0.2); }
+  
+  .quick-replies { display: flex; flex-wrap: wrap; gap: 10px; padding: 16px 20px; background: var(--bg-soft); border-top: 1px solid rgba(184, 115, 127, 0.1); }
+  .quick-btn { background: #ffffff; border: 1.5px solid var(--primary); color: var(--primary); padding: 10px 18px; border-radius: 24px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.25s ease; font-family: 'Inter', sans-serif; }
+  .quick-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(184, 115, 127, 0.25); }
+  
+  /* Special Calendar Button Style */
+  .calendar-btn { 
+    background: var(--primary-light); 
+    border: 1.5px dashed var(--primary); 
+    color: var(--primary-dark); 
+    padding: 10px 18px; 
+    border-radius: 24px; 
+    font-size: 13px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    width: 100%; 
+    justify-content: center; 
+    transition: all 0.25s ease; 
     font-family: 'Inter', sans-serif;
   }
-  .quick-btn:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(184, 115, 127, 0.25);
-  }
-  .chat-input {
-    display: flex;
-    padding: 16px 20px;
-    background: #ffffff;
-    border-top: 1px solid rgba(184, 115, 127, 0.1);
-    gap: 12px;
-    align-items: center;
-  }
-  .chat-input input {
-    flex: 1;
-    padding: 14px 18px;
-    background: var(--bg-soft);
-    border: 1.5px solid rgba(184, 115, 127, 0.2);
-    border-radius: 28px;
-    color: var(--text-dark);
-    font-size: 14px;
-    outline: none;
-    font-family: 'Inter', sans-serif;
-    transition: border-color 0.2s;
-  }
-  .chat-input input:focus {
-    border-color: var(--primary);
-  }
-  .chat-input input::placeholder {
-    color: #b8a0a5;
-  }
-  .chat-input button {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    border: none;
-    color: white;
-    padding: 14px 22px;
-    border-radius: 28px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2);
-  }
-  .chat-input button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(156, 90, 102, 0.3);
-  }
+  .calendar-btn:hover { background: var(--primary); color: white; border-style: solid; transform: translateY(-1px); }
+
+  .chat-input { display: flex; padding: 16px 20px; background: #ffffff; border-top: 1px solid rgba(184, 115, 127, 0.1); gap: 12px; align-items: center; }
+  .chat-input input { flex: 1; padding: 14px 18px; background: var(--bg-soft); border: 1.5px solid rgba(184, 115, 127, 0.2); border-radius: 28px; color: var(--text-dark); font-size: 14px; outline: none; font-family: 'Inter', sans-serif; transition: border-color 0.2s; }
+  .chat-input input:focus { border-color: var(--primary); }
+  .chat-input input::placeholder { color: #b8a0a5; }
+  .chat-input button { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border: none; color: white; padding: 14px 22px; border-radius: 28px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 14px; transition: all 0.25s ease; box-shadow: 0 4px 12px rgba(156, 90, 102, 0.2); }
+  .chat-input button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(156, 90, 102, 0.3); }
+  
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+  /* Custom Flatpickr Theme to match our bot */
+  .flatpickr-calendar { border-radius: 16px !important; border: 1px solid rgba(184, 115, 127, 0.2) !important; box-shadow: 0 10px 30px rgba(184, 115, 127, 0.2) !important; }
+  .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--primary) !important; border-color: var(--primary) !important; }
+  .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover { background: var(--primary-dark) !important; }
+  .flatpickr-months .flatpickr-month { background: var(--primary-light); color: var(--primary-dark); }
+  .flatpickr-current-month .flatpickr-monthDropdown-months { color: var(--primary-dark); font-weight: 600; }
 </style>
 </head>
 <body>
 <div class="chat-container">
   <div class="chat-header">
     <div class="header-content">
-      <div class="logo-icon"></div>
+      <div class="logo-icon">🛡️</div>
       <div class="header-text">
         <h1>Physiotherapy Clinic</h1>
         <p>Professional Care & Rehabilitation</p>
@@ -211,6 +125,9 @@ const html = `<!DOCTYPE html>
     <button onclick="sendMessage()">Send</button>
   </div>
 </div>
+
+<!-- Flatpickr Calendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
@@ -218,9 +135,30 @@ const quickRepliesContainer = document.getElementById('quickReplies');
 
 let currentContext = null;
 
+// Setup Hidden Calendar Input
+const hiddenDateInput = document.createElement('input');
+hiddenDateInput.id = 'hiddenDateInput';
+hiddenDateInput.style.display = 'none';
+document.body.appendChild(hiddenDateInput);
+
+// Initialize Flatpickr
+window.fpInstance = flatpickr(hiddenDateInput, {
+  enableTime: true,
+  dateFormat: "Y-m-d H:i",
+  minDate: "today",
+  time_24hr: false,
+  onChange: function(selectedDates, dateStr, instance) {
+    // Format the date nicely for the chat
+    const options = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+    const friendlyDate = new Date(dateStr).toLocaleDateString('en-US', options);
+    userInput.value = friendlyDate;
+    sendMessage();
+  }
+});
+
 const responses = {
   greeting: "Welcome to our Physiotherapy Clinic. How can I support your health and recovery journey today?",
-  book: "I'd be happy to help you book a consultation. What day and time works best for you?",
+  book: "I'd be happy to help you book a consultation. Please pick a date and time that works best for you:",
   pain: "I understand you're experiencing discomfort. Could you tell me more about your symptoms?",
   hours: "Our clinic hours are Monday to Friday, 8 AM to 6 PM, and Saturday 9 AM to 1 PM. Would you like to schedule a visit?",
   location: "We're located at 123 Medical Center Drive, Suite 100. Would you like directions or to book an appointment?",
@@ -246,15 +184,30 @@ function addMessage(text, sender) {
 function showQuickReplies(options) {
   quickRepliesContainer.innerHTML = '';
   options.forEach(option => {
-    const btn = document.createElement('button');
-    btn.classList.add('quick-btn');
-    btn.innerText = option;
-    btn.onclick = () => handleQuickReply(option);
-    quickRepliesContainer.appendChild(btn);
+    if (option === '📅 Pick Date & Time') {
+      // Special Calendar Button
+      const btn = document.createElement('button');
+      btn.classList.add('calendar-btn');
+      btn.innerHTML = '📅 Pick Date & Time';
+      btn.onclick = () => {
+        window.fpInstance.open();
+      };
+      quickRepliesContainer.appendChild(btn);
+    } else {
+      // Normal Quick Reply Button
+      const btn = document.createElement('button');
+      btn.classList.add('quick-btn');
+      btn.innerText = option;
+      btn.onclick = () => handleQuickReply(option);
+      quickRepliesContainer.appendChild(btn);
+    }
   });
 }
 
 function handleQuickReply(text) {
+  // If they click the calendar button, don't send it as a text message
+  if (text === '📅 Pick Date & Time') return; 
+  
   addMessage(text, 'user');
   quickRepliesContainer.innerHTML = '';
   processInput(text.toLowerCase());
@@ -284,7 +237,8 @@ function processInput(input) {
       currentContext = null;
     } 
     else if (['thanks', 'thank you', 'bye', 'goodbye', 'no thanks'].some(w => text.includes(w))) {
-      reply = "You're very welcome! Wishing you health and wellness. 🌸";
+      // UPDATED: Added "Have a good day!"
+      reply = "You're very welcome! Wishing you health, wellness, and have a good day! 🌸";
       nextReplies = [];
       currentContext = null;
     }
@@ -297,8 +251,8 @@ function processInput(input) {
         nextReplies = ['Clinic Hours', 'Location', 'No, thanks'];
         currentContext = null;
       } else {
-        reply = "Could you please specify a preferred day or time? For example, 'Tuesday morning' or 'Next week'.";
-        nextReplies = ['Tomorrow', 'Next Week'];
+        reply = "Could you please specify a preferred day or time? You can use the calendar below or type it out.";
+        nextReplies = ['📅 Pick Date & Time', 'Tomorrow', 'Next Week'];
       }
     }
     else if (currentContext === 'symptoms') {
@@ -316,7 +270,7 @@ function processInput(input) {
     }
     else if (['book', 'appointment', 'schedule', 'consultation', 'session', 'reserve', 'visit'].some(w => text.includes(w))) {
       reply = responses.book;
-      nextReplies = ['Tomorrow', 'Next Week'];
+      nextReplies = ['📅 Pick Date & Time', 'Tomorrow', 'Next Week'];
       currentContext = 'booking_time';
     } 
     else if (['hurt', 'pain', 'ache', 'sore', 'symptoms', 'discomfort', 'problem', 'issue'].some(w => text.includes(w))) {
@@ -381,8 +335,13 @@ initChat();
 </html>`;
 
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.end(html);
+  if (req.method === 'GET' && req.url === '/') {
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(html);
+    return;
+  }
+  res.writeHead(404);
+  res.end();
 });
 
 server.listen(PORT, () => {
