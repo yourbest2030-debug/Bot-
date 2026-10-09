@@ -1,6 +1,6 @@
 const http = require('http');
 const PORT = process.env.PORT || 3000;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 const html = `<!DOCTYPE html>
 <html lang="en">
@@ -108,7 +108,6 @@ const userInput = document.getElementById('userInput');
 const micBtn = document.getElementById('micBtn');
 const voiceIndicator = document.getElementById('voiceIndicator');
 
-// Voice Setup (Web Speech API)
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
 let isListening = false;
@@ -127,7 +126,7 @@ if (SpeechRecognition) {
     sendMessage();
   };
 } else {
-  micBtn.style.display = 'none'; // Hide mic if browser doesn't support it
+  micBtn.style.display = 'none';
 }
 
 micBtn.addEventListener('click', () => {
@@ -136,10 +135,8 @@ micBtn.addEventListener('click', () => {
   else recognition.start();
 });
 
-// Text to Speech
 function speakText(text) {
   if ('speechSynthesis' in window) {
-    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1;
@@ -163,7 +160,6 @@ function sendMessage() {
   addMessage(text, 'user');
   userInput.value = '';
   
-  // Show typing indicator
   const typingDiv = document.createElement('div');
   typingDiv.classList.add('message', 'bot-msg');
   typingDiv.innerText = '...';
@@ -171,7 +167,6 @@ function sendMessage() {
   chatMessages.appendChild(typingDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
-  // Send to backend AI
   fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -182,7 +177,7 @@ function sendMessage() {
     document.getElementById('typingIndicator').remove();
     const reply = data.reply || "I'm sorry, I'm having trouble connecting right now.";
     addMessage(reply, 'bot');
-    speakText(reply); // Speak the AI response
+    speakText(reply);
   })
   .catch(err => {
     document.getElementById('typingIndicator').remove();
@@ -194,21 +189,20 @@ function handleEnter(event) {
   if (event.key === 'Enter') sendMessage();
 }
 
-// Initial greeting
 addMessage("Hello! Welcome to our Physiotherapy Clinic. How can I support your health journey today?", 'bot');
 </script>
 </body>
 </html>`;
 
+const SYSTEM_PROMPT = "You are a professional, empathetic AI assistant for a Physiotherapy Clinic. You help patients book appointments, answer questions about clinic hours (Mon-Fri 8AM-6PM, Sat 9AM-1PM), location (123 Medical Center Dr), and provide general, safe information about physiotherapy. Do not give specific medical diagnoses. Keep responses concise (under 3 sentences) so they are easy to read and speak aloud.";
+
 const server = http.createServer(async (req, res) => {
-  // Serve the frontend
   if (req.method === 'GET' && req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
     return;
   }
 
-  // Handle AI Chat API
   if (req.method === 'POST' && req.url === '/api/chat') {
     let body = '';
     req.on('data', chunk => { body += chunk.toString(); });
@@ -217,28 +211,27 @@ const server = http.createServer(async (req, res) => {
         const { message } = JSON.parse(body);
         let aiReply = "I'm sorry, the AI service is currently unavailable. Please call the clinic directly.";
 
-        if (OPENAI_API_KEY) {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        if (GEMINI_API_KEY) {
+          // Using Google Gemini 1.5 Flash (100% Free, No Credit Card)
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${OPENAI_API_KEY}`,
-              'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              model: 'gpt-4o-mini', // Fast and cheap model
-              messages: [
-                { role: 'system', content: 'You are a professional, empathetic AI assistant for a Physiotherapy Clinic. You help patients book appointments, answer questions about clinic hours (Mon-Fri 8AM-6PM, Sat 9AM-1PM), location (123 Medical Center Dr), and provide general, safe information about physiotherapy. Do not give specific medical diagnoses. Keep responses concise (under 3 sentences) so they are easy to read and speak aloud.' },
-                { role: 'user', content: message }
-              ]
+              contents: [{
+                parts: [{
+                  text: `${SYSTEM_PROMPT}\n\nUser: ${message}`
+                }]
+              }]
             })
           });
           const data = await response.json();
-          if (data.choices && data.choices[0]) {
-            aiReply = data.choices[0].message.content;
+          if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            aiReply = data.candidates[0].content.parts[0].text;
+          } else {
+            aiReply = "I'm having a little trouble thinking right now. Could you please rephrase that?";
           }
         } else {
-          // Fallback if no API key is set
-          aiReply = "Please add your OPENAI_API_KEY in Railway Variables to enable the AI brain!";
+          aiReply = "Please add your GEMINI_API_KEY in Railway Variables to enable the AI brain!";
         }
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
