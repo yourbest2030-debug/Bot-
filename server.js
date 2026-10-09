@@ -72,36 +72,58 @@ addMessage("Hello! Welcome to our Physiotherapy Clinic. How can I support your h
 const SYSTEM_PROMPT = "You are a professional, empathetic AI assistant for a Physiotherapy Clinic. You help patients book appointments, answer questions about clinic hours (Mon-Fri 8AM-6PM, Sat 9AM-1PM), location (123 Medical Center Dr), and provide general, safe information about physiotherapy. Do not give specific medical diagnoses. Keep responses concise (under 3 sentences).";
 
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(html); return; }
+  if (req.method === 'GET' && req.url === '/') { 
+    res.writeHead(200, { 'Content-Type': 'text/html' }); 
+    res.end(html); 
+    return; 
+  }
+  
   if (req.method === 'POST' && req.url === '/api/chat') {
-    let body = ''; req.on('data', chunk => { body += chunk.toString(); });
+    let body = ''; 
+    req.on('data', chunk => { body += chunk.toString(); });
     req.on('end', async () => {
       try {
         const { message } = JSON.parse(body);
         let aiReply = "I'm having a little trouble thinking right now. Could you please rephrase that?";
+        
         if (GEMINI_API_KEY) {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-          const response = await fetch(url, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser: ${message}` }] }] })
-          });
-          const data = await response.json();
+          // Updated to use the correct model endpoint
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
           
-          // DEBUG: This will print the exact error from Google to your Railway logs!
-          console.log("GOOGLE GEMINI RAW RESPONSE:", JSON.stringify(data));
+          const response = await fetch(url, {
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nUser: ${message}` }] }] 
+            })
+          });
+          
+          const data = await response.json();
 
           if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
             aiReply = data.candidates[0].content.parts[0].text;
           } else {
-            console.error("GEMINI FAILED. Check the raw response above.");
+            console.error("GEMINI API ERROR RESPONSE:", JSON.stringify(data));
           }
         } else {
           aiReply = "Please add your GEMINI_API_KEY in Railway Variables!";
         }
-        res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ reply: aiReply }));
-      } catch (error) { console.error(error); res.writeHead(500, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ reply: "Internal server error." })); }
-    }); return;
+        
+        res.writeHead(200, { 'Content-Type': 'application/json' }); 
+        res.end(JSON.stringify({ reply: aiReply }));
+      } catch (error) { 
+        console.error("Server Error:", error); 
+        res.writeHead(500, { 'Content-Type': 'application/json' }); 
+        res.end(JSON.stringify({ reply: "Internal server error." })); 
+      }
+    }); 
+    return;
   }
-  res.writeHead(404); res.end();
+  
+  res.writeHead(404); 
+  res.end();
 });
-server.listen(PORT, () => { console.log(`AI Physio Bot is live on port ${PORT}`); });
+
+server.listen(PORT, () => { 
+  console.log(`AI Physio Bot is live on port ${PORT}`); 
+});
