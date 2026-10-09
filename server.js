@@ -8,7 +8,6 @@ const html = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Physiotherapy Clinic</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
   :root {
     --primary: #b8737f;
@@ -66,24 +65,19 @@ const html = `<!DOCTYPE html>
   .quick-btn { background: #ffffff; border: 1.5px solid var(--primary); color: var(--primary); padding: 10px 18px; border-radius: 24px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.25s ease; font-family: 'Inter', sans-serif; }
   .quick-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(184, 115, 127, 0.25); }
   
-  .calendar-btn { 
-    background: var(--primary-light); 
-    border: 1.5px dashed var(--primary); 
-    color: var(--primary-dark); 
-    padding: 12px 18px; 
-    border-radius: 24px; 
-    font-size: 13px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    width: 100%; 
-    justify-content: center; 
-    transition: all 0.25s ease; 
-    font-family: 'Inter', sans-serif;
-  }
-  .calendar-btn:hover { background: var(--primary); color: white; border-style: solid; transform: translateY(-1px); }
+  .schedule-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; width: 100%; }
+  .schedule-day { background: #ffffff; border: 2px solid var(--primary); border-radius: 12px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.25s ease; font-weight: 600; color: var(--primary-dark); font-size: 12px; }
+  .schedule-day:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(184, 115, 127, 0.3); }
+  .schedule-day.selected { background: var(--primary); color: white; border-color: var(--primary-dark); }
+  .schedule-day.disabled { opacity: 0.3; cursor: not-allowed; background: #f0f0f0; border-color: #ccc; }
+  .schedule-day .day-name { font-size: 11px; margin-bottom: 4px; opacity: 0.9; }
+  .schedule-day .day-date { font-size: 16px; font-weight: 700; }
+
+  .time-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; width: 100%; }
+  .time-slot { background: #ffffff; border: 1.5px solid var(--primary); border-radius: 20px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.25s ease; font-size: 13px; font-weight: 500; color: var(--primary-dark); }
+  .time-slot:hover { background: var(--primary); color: white; transform: scale(1.05); }
+  .time-slot.selected { background: var(--primary); color: white; }
+  .time-slot.unavailable { opacity: 0.3; cursor: not-allowed; background: #f0f0f0; border-color: #ccc; }
 
   .chat-input { display: flex; padding: 16px 20px; background: #ffffff; border-top: 1px solid rgba(184, 115, 127, 0.1); gap: 12px; align-items: center; }
   .chat-input input { flex: 1; padding: 14px 18px; background: var(--bg-soft); border: 1.5px solid rgba(184, 115, 127, 0.2); border-radius: 28px; color: var(--text-dark); font-size: 14px; outline: none; font-family: 'Inter', sans-serif; transition: border-color 0.2s; }
@@ -95,103 +89,6 @@ const html = `<!DOCTYPE html>
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-  /* Visual Schedule Grid */
-  .schedule-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin: 10px 0;
-    width: 100%;
-  }
-  .schedule-day {
-    background: #ffffff;
-    border: 2px solid var(--primary);
-    border-radius: 12px;
-    padding: 12px 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    font-weight: 600;
-    color: var(--primary-dark);
-    font-size: 12px;
-  }
-  .schedule-day:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(184, 115, 127, 0.3);
-  }
-  .schedule-day.selected {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary-dark);
-  }
-  .schedule-day.disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-    background: #f0f0f0;
-    border-color: #ccc;
-  }
-  .schedule-day .day-name { font-size: 11px; margin-bottom: 4px; opacity: 0.9; }
-  .schedule-day .day-date { font-size: 16px; font-weight: 700; }
-
-  .time-slots {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 10px;
-    width: 100%;
-  }
-  .time-slot {
-    background: #ffffff;
-    border: 1.5px solid var(--primary);
-    border-radius: 20px;
-    padding: 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--primary-dark);
-  }
-  .time-slot:hover {
-    background: var(--primary);
-    color: white;
-    transform: scale(1.05);
-  }
-  .time-slot.selected {
-    background: var(--primary);
-    color: white;
-  }
-  .time-slot.unavailable {
-    opacity: 0.3;
-    cursor: not-allowed;
-    background: #f0f0f0;
-    border-color: #ccc;
-  }
-
-  /* Flatpickr English only */
-  .flatpickr-calendar { 
-    border-radius: 16px !important; 
-    border: 1px solid rgba(184, 115, 127, 0.2) !important; 
-    box-shadow: 0 10px 30px rgba(184, 115, 127, 0.2) !important; 
-  }
-  .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { 
-    background: var(--primary) !important; 
-    border-color: var(--primary) !important; 
-  }
-  .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover { 
-    background: var(--primary-dark) !important; 
-  }
-  .flatpickr-months .flatpickr-month { 
-    background: var(--primary-light); 
-    color: var(--primary-dark); 
-  }
-  .flatpickr-current-month .flatpickr-monthDropdown-months { 
-    color: var(--primary-dark); 
-    font-weight: 600; 
-  }
 </style>
 </head>
 <body>
@@ -214,7 +111,6 @@ const html = `<!DOCTYPE html>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
@@ -223,7 +119,6 @@ const quickRepliesContainer = document.getElementById('quickReplies');
 let currentContext = null;
 let selectedDate = null;
 
-// Generate next 7 days for visual schedule
 function generateScheduleDays() {
   const days = [];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -244,7 +139,6 @@ function generateScheduleDays() {
   return days;
 }
 
-// Time slots for appointments
 const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
 
 function showVisualSchedule() {
@@ -255,15 +149,8 @@ function showVisualSchedule() {
   scheduleHTML += '<div class="schedule-grid">';
   
   days.forEach((day, index) => {
-    const isDisabled = day.isWeekend; // Disable weekends
-    scheduleHTML += \`
-      <div class="schedule-day \${isDisabled ? 'disabled' : ''}" 
-           onclick="\${isDisabled ? '' : 'selectDay(' + index + ')'}"
-           id="day-\${index}">
-        <div class="day-name">\${day.dayName}</div>
-        <div class="day-date">\${day.dayNum} \${day.month}</div>
-      </div>
-    \`;
+    const isDisabled = day.isWeekend;
+    scheduleHTML += '<div class="schedule-day ' + (isDisabled ? 'disabled' : '') + '" onclick="' + (isDisabled ? '' : 'selectDay(' + index + ')') + '" id="day-' + index + '"><div class="day-name">' + day.dayName + '</div><div class="day-date">' + day.dayNum + ' ' + day.month + '</div></div>';
   });
   
   scheduleHTML += '</div>';
@@ -272,11 +159,7 @@ function showVisualSchedule() {
   scheduleHTML += '<div class="time-slots">';
   
   timeSlots.forEach((time, index) => {
-    scheduleHTML += \`
-      <div class="time-slot" onclick="selectTime('\${time}')" id="time-\${index}">
-        \${time}
-      </div>
-    \`;
+    scheduleHTML += '<div class="time-slot" onclick="selectTime(\'' + time + '\')" id="time-' + index + '">' + time + '</div>';
   });
   
   scheduleHTML += '</div></div></div>';
@@ -288,16 +171,13 @@ function selectDay(dayIndex) {
   const days = generateScheduleDays();
   selectedDate = days[dayIndex];
   
-  // Update visual selection
   document.querySelectorAll('.schedule-day').forEach((el, idx) => {
     el.classList.remove('selected');
     if (idx === dayIndex) el.classList.add('selected');
   });
   
-  // Show time slots
   document.getElementById('timeSlotsContainer').style.display = 'block';
   
-  // Scroll to time slots
   setTimeout(() => {
     document.getElementById('timeSlotsContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, 100);
@@ -306,7 +186,7 @@ function selectDay(dayIndex) {
 function selectTime(time) {
   if (!selectedDate) return;
   
-  const dateTimeString = \`\${selectedDate.fullDayName}, \${selectedDate.dayNum} \${selectedDate.month} at \${time}\`;
+  const dateTimeString = selectedDate.fullDayName + ', ' + selectedDate.dayNum + ' ' + selectedDate.month + ' at ' + time;
   
   addMessage(dateTimeString, 'user');
   
@@ -338,7 +218,7 @@ function initChat() {
 function addMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.classList.add('message', sender === 'bot' ? 'bot-msg' : 'user-msg');
-  msgDiv.innerHTML = text; // Use innerHTML to render HTML
+  msgDiv.innerHTML = text;
   chatMessages.appendChild(msgDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -390,7 +270,7 @@ function processInput(input) {
     }
     else if (currentContext === 'booking_time') {
       const timeWords = ['am', 'pm', 'morning', 'afternoon', 'evening', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'tomorrow', 'today', 'next week', 'weekend'];
-      const isTime = timeWords.some(w => text.includes(w)) || /\\d{1,2}/.test(text);
+      const isTime = timeWords.some(w => text.includes(w)) || /\d{1,2}/.test(text);
       
       if (isTime) {
         reply = "Wonderful! I've noted your preference for " + input + ". Our care coordinator will contact you shortly to confirm your appointment. Is there anything else I can help with?";
@@ -419,7 +299,7 @@ function processInput(input) {
       nextReplies = [];
       currentContext = 'booking_time';
       showVisualSchedule();
-      return; // Skip the normal addMessage since we're showing HTML
+      return;
     } 
     else if (['hurt', 'pain', 'ache', 'sore', 'symptoms', 'discomfort', 'problem', 'issue'].some(w => text.includes(w))) {
       reply = responses.pain;
@@ -493,5 +373,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(\`Server is live on port \${PORT}\`);
+  console.log('Server is live on port ' + PORT);
 });
