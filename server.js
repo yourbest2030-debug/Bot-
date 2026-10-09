@@ -8,7 +8,6 @@ const html = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Physiotherapy Clinic</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<!-- Flatpickr Calendar CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
   :root {
@@ -67,12 +66,11 @@ const html = `<!DOCTYPE html>
   .quick-btn { background: #ffffff; border: 1.5px solid var(--primary); color: var(--primary); padding: 10px 18px; border-radius: 24px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.25s ease; font-family: 'Inter', sans-serif; }
   .quick-btn:hover { background: var(--primary); color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(184, 115, 127, 0.25); }
   
-  /* Special Calendar Button Style */
   .calendar-btn { 
     background: var(--primary-light); 
     border: 1.5px dashed var(--primary); 
     color: var(--primary-dark); 
-    padding: 10px 18px; 
+    padding: 12px 18px; 
     border-radius: 24px; 
     font-size: 13px; 
     font-weight: 600; 
@@ -98,12 +96,102 @@ const html = `<!DOCTYPE html>
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-  /* Custom Flatpickr Theme to match our bot */
-  .flatpickr-calendar { border-radius: 16px !important; border: 1px solid rgba(184, 115, 127, 0.2) !important; box-shadow: 0 10px 30px rgba(184, 115, 127, 0.2) !important; }
-  .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { background: var(--primary) !important; border-color: var(--primary) !important; }
-  .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover { background: var(--primary-dark) !important; }
-  .flatpickr-months .flatpickr-month { background: var(--primary-light); color: var(--primary-dark); }
-  .flatpickr-current-month .flatpickr-monthDropdown-months { color: var(--primary-dark); font-weight: 600; }
+  /* Visual Schedule Grid */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 10px 0;
+    width: 100%;
+  }
+  .schedule-day {
+    background: #ffffff;
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 600;
+    color: var(--primary-dark);
+    font-size: 12px;
+  }
+  .schedule-day:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(184, 115, 127, 0.3);
+  }
+  .schedule-day.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary-dark);
+  }
+  .schedule-day.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #f0f0f0;
+    border-color: #ccc;
+  }
+  .schedule-day .day-name { font-size: 11px; margin-bottom: 4px; opacity: 0.9; }
+  .schedule-day .day-date { font-size: 16px; font-weight: 700; }
+
+  .time-slots {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .time-slot {
+    background: #ffffff;
+    border: 1.5px solid var(--primary);
+    border-radius: 20px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--primary-dark);
+  }
+  .time-slot:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.05);
+  }
+  .time-slot.selected {
+    background: var(--primary);
+    color: white;
+  }
+  .time-slot.unavailable {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #f0f0f0;
+    border-color: #ccc;
+  }
+
+  /* Flatpickr English only */
+  .flatpickr-calendar { 
+    border-radius: 16px !important; 
+    border: 1px solid rgba(184, 115, 127, 0.2) !important; 
+    box-shadow: 0 10px 30px rgba(184, 115, 127, 0.2) !important; 
+  }
+  .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange { 
+    background: var(--primary) !important; 
+    border-color: var(--primary) !important; 
+  }
+  .flatpickr-day.selected:hover, .flatpickr-day.startRange:hover, .flatpickr-day.endRange:hover { 
+    background: var(--primary-dark) !important; 
+  }
+  .flatpickr-months .flatpickr-month { 
+    background: var(--primary-light); 
+    color: var(--primary-dark); 
+  }
+  .flatpickr-current-month .flatpickr-monthDropdown-months { 
+    color: var(--primary-dark); 
+    font-weight: 600; 
+  }
 </style>
 </head>
 <body>
@@ -126,7 +214,6 @@ const html = `<!DOCTYPE html>
   </div>
 </div>
 
-<!-- Flatpickr Calendar JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 const chatMessages = document.getElementById('chatMessages');
@@ -134,31 +221,106 @@ const userInput = document.getElementById('userInput');
 const quickRepliesContainer = document.getElementById('quickReplies');
 
 let currentContext = null;
+let selectedDate = null;
 
-// Setup Hidden Calendar Input
-const hiddenDateInput = document.createElement('input');
-hiddenDateInput.id = 'hiddenDateInput';
-hiddenDateInput.style.display = 'none';
-document.body.appendChild(hiddenDateInput);
-
-// Initialize Flatpickr
-window.fpInstance = flatpickr(hiddenDateInput, {
-  enableTime: true,
-  dateFormat: "Y-m-d H:i",
-  minDate: "today",
-  time_24hr: false,
-  onChange: function(selectedDates, dateStr, instance) {
-    // Format the date nicely for the chat
-    const options = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
-    const friendlyDate = new Date(dateStr).toLocaleDateString('en-US', options);
-    userInput.value = friendlyDate;
-    sendMessage();
+// Generate next 7 days for visual schedule
+function generateScheduleDays() {
+  const days = [];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const fullDayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+    days.push({
+      date: date,
+      dayName: dayNames[date.getDay()],
+      fullDayName: fullDayNames[date.getDay()],
+      dayNum: date.getDate(),
+      month: date.toLocaleDateString('en-US', { month: 'short' }),
+      isWeekend: date.getDay() === 0 || date.getDay() === 6
+    });
   }
-});
+  return days;
+}
+
+// Time slots for appointments
+const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
+
+function showVisualSchedule() {
+  const days = generateScheduleDays();
+  
+  let scheduleHTML = '<div style="background: white; padding: 15px; border-radius: 16px; margin: 10px 0;">';
+  scheduleHTML += '<div style="font-weight: 600; color: var(--primary-dark); margin-bottom: 12px; text-align: center;">📅 Select Your Preferred Day</div>';
+  scheduleHTML += '<div class="schedule-grid">';
+  
+  days.forEach((day, index) => {
+    const isDisabled = day.isWeekend; // Disable weekends
+    scheduleHTML += \`
+      <div class="schedule-day \${isDisabled ? 'disabled' : ''}" 
+           onclick="\${isDisabled ? '' : 'selectDay(' + index + ')'}"
+           id="day-\${index}">
+        <div class="day-name">\${day.dayName}</div>
+        <div class="day-date">\${day.dayNum} \${day.month}</div>
+      </div>
+    \`;
+  });
+  
+  scheduleHTML += '</div>';
+  scheduleHTML += '<div id="timeSlotsContainer" style="display: none;">';
+  scheduleHTML += '<div style="font-weight: 600; color: var(--primary-dark); margin: 12px 0 8px 0; text-align: center;">🕐 Select Time</div>';
+  scheduleHTML += '<div class="time-slots">';
+  
+  timeSlots.forEach((time, index) => {
+    scheduleHTML += \`
+      <div class="time-slot" onclick="selectTime('\${time}')" id="time-\${index}">
+        \${time}
+      </div>
+    \`;
+  });
+  
+  scheduleHTML += '</div></div></div>';
+  
+  addMessage(scheduleHTML, 'bot');
+}
+
+function selectDay(dayIndex) {
+  const days = generateScheduleDays();
+  selectedDate = days[dayIndex];
+  
+  // Update visual selection
+  document.querySelectorAll('.schedule-day').forEach((el, idx) => {
+    el.classList.remove('selected');
+    if (idx === dayIndex) el.classList.add('selected');
+  });
+  
+  // Show time slots
+  document.getElementById('timeSlotsContainer').style.display = 'block';
+  
+  // Scroll to time slots
+  setTimeout(() => {
+    document.getElementById('timeSlotsContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+function selectTime(time) {
+  if (!selectedDate) return;
+  
+  const dateTimeString = \`\${selectedDate.fullDayName}, \${selectedDate.dayNum} \${selectedDate.month} at \${time}\`;
+  
+  addMessage(dateTimeString, 'user');
+  
+  setTimeout(() => {
+    const reply = "Perfect! I've noted your appointment request for " + dateTimeString + ". Our care coordinator will contact you within 24 hours to confirm. Is there anything else I can help you with?";
+    addMessage(reply, 'bot');
+    showQuickReplies(['Clinic Hours', 'Location', 'No, thanks']);
+    currentContext = null;
+  }, 600);
+}
 
 const responses = {
   greeting: "Welcome to our Physiotherapy Clinic. How can I support your health and recovery journey today?",
-  book: "I'd be happy to help you book a consultation. Please pick a date and time that works best for you:",
+  book: "I'd be happy to help you book a consultation. Please select your preferred day and time from the schedule below:",
   pain: "I understand you're experiencing discomfort. Could you tell me more about your symptoms?",
   hours: "Our clinic hours are Monday to Friday, 8 AM to 6 PM, and Saturday 9 AM to 1 PM. Would you like to schedule a visit?",
   location: "We're located at 123 Medical Center Drive, Suite 100. Would you like directions or to book an appointment?",
@@ -176,7 +338,7 @@ function initChat() {
 function addMessage(text, sender) {
   const msgDiv = document.createElement('div');
   msgDiv.classList.add('message', sender === 'bot' ? 'bot-msg' : 'user-msg');
-  msgDiv.innerText = text;
+  msgDiv.innerHTML = text; // Use innerHTML to render HTML
   chatMessages.appendChild(msgDiv);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -184,30 +346,15 @@ function addMessage(text, sender) {
 function showQuickReplies(options) {
   quickRepliesContainer.innerHTML = '';
   options.forEach(option => {
-    if (option === '📅 Pick Date & Time') {
-      // Special Calendar Button
-      const btn = document.createElement('button');
-      btn.classList.add('calendar-btn');
-      btn.innerHTML = '📅 Pick Date & Time';
-      btn.onclick = () => {
-        window.fpInstance.open();
-      };
-      quickRepliesContainer.appendChild(btn);
-    } else {
-      // Normal Quick Reply Button
-      const btn = document.createElement('button');
-      btn.classList.add('quick-btn');
-      btn.innerText = option;
-      btn.onclick = () => handleQuickReply(option);
-      quickRepliesContainer.appendChild(btn);
-    }
+    const btn = document.createElement('button');
+    btn.classList.add('quick-btn');
+    btn.innerText = option;
+    btn.onclick = () => handleQuickReply(option);
+    quickRepliesContainer.appendChild(btn);
   });
 }
 
 function handleQuickReply(text) {
-  // If they click the calendar button, don't send it as a text message
-  if (text === '📅 Pick Date & Time') return; 
-  
   addMessage(text, 'user');
   quickRepliesContainer.innerHTML = '';
   processInput(text.toLowerCase());
@@ -237,22 +384,21 @@ function processInput(input) {
       currentContext = null;
     } 
     else if (['thanks', 'thank you', 'bye', 'goodbye', 'no thanks'].some(w => text.includes(w))) {
-      // UPDATED: Added "Have a good day!"
       reply = "You're very welcome! Wishing you health, wellness, and have a good day! 🌸";
       nextReplies = [];
       currentContext = null;
     }
     else if (currentContext === 'booking_time') {
       const timeWords = ['am', 'pm', 'morning', 'afternoon', 'evening', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'tomorrow', 'today', 'next week', 'weekend'];
-      const isTime = timeWords.some(w => text.includes(w)) || /\d{1,2}/.test(text);
+      const isTime = timeWords.some(w => text.includes(w)) || /\\d{1,2}/.test(text);
       
       if (isTime) {
         reply = "Wonderful! I've noted your preference for " + input + ". Our care coordinator will contact you shortly to confirm your appointment. Is there anything else I can help with?";
         nextReplies = ['Clinic Hours', 'Location', 'No, thanks'];
         currentContext = null;
       } else {
-        reply = "Could you please specify a preferred day or time? You can use the calendar below or type it out.";
-        nextReplies = ['📅 Pick Date & Time', 'Tomorrow', 'Next Week'];
+        reply = "Please use the visual schedule above to select your preferred day and time.";
+        nextReplies = [];
       }
     }
     else if (currentContext === 'symptoms') {
@@ -270,8 +416,10 @@ function processInput(input) {
     }
     else if (['book', 'appointment', 'schedule', 'consultation', 'session', 'reserve', 'visit'].some(w => text.includes(w))) {
       reply = responses.book;
-      nextReplies = ['📅 Pick Date & Time', 'Tomorrow', 'Next Week'];
+      nextReplies = [];
       currentContext = 'booking_time';
+      showVisualSchedule();
+      return; // Skip the normal addMessage since we're showing HTML
     } 
     else if (['hurt', 'pain', 'ache', 'sore', 'symptoms', 'discomfort', 'problem', 'issue'].some(w => text.includes(w))) {
       reply = responses.pain;
@@ -345,5 +493,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is live on port ${PORT}`);
+  console.log(\`Server is live on port \${PORT}\`);
 });
